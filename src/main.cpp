@@ -5,8 +5,7 @@
 #include <windows.h>
 #include <conio.h>
 
-int main_color = 9;
-int slected_color = 12;
+#include "logo.hpp"
 
 void SetCursorPosition(int XPos, int YPos)
 {
@@ -77,11 +76,11 @@ int Menu(HANDLE hConsole, int numOfOptions, std::string options[64], std::string
 
     for (int i = 0; i < numOfOptions; i++)
     {
-        SetConsoleTextAttribute(hConsole, main_color);
+        SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
 
         if (slected == i)
         {
-            SetConsoleTextAttribute(hConsole, slected_color);
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
             std::cout << "> ";
         }
 
@@ -122,11 +121,11 @@ int Menu(HANDLE hConsole, int numOfOptions, std::string options[64], std::string
 
         for (int i = 0; i < numOfOptions; i++)
         {
-            SetConsoleTextAttribute(hConsole, main_color);
+            SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
 
             if (slected == i)
             {
-                SetConsoleTextAttribute(hConsole, slected_color);
+                SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
                 std::cout << "> ";
             }
 
@@ -137,14 +136,14 @@ int Menu(HANDLE hConsole, int numOfOptions, std::string options[64], std::string
     }
 }
 
-void MakeProjectFiles(std::string name, int type)
+void MakeProgramFiles(std::string name)
 {
     std::string project_path = "./" + name;
     std::filesystem::create_directory(project_path);
     std::filesystem::create_directory(project_path + "/src");
     std::filesystem::create_directory(project_path + "/lib");
     std::filesystem::create_directory(project_path + "/bin");
-    std::filesystem::create_directory(project_path + "/out");
+    std::filesystem::create_directory(project_path + "/obj");
     std::filesystem::create_directory(project_path + "/include");
 
     std::ofstream ofs_main(project_path + "/src/main.cpp");
@@ -160,31 +159,33 @@ int main(int argc, char *argv[])
 
     std::ofstream ofs_make(project_path + "/makefile");
     ofs_make <<
-R"(CC = g++
-MAIN = bin/main.exe
-CFLAGS = -std=c++17 -Wall
-DEFS = 
+R"(CXX = g++
+MAIN = bin/)" << name + R"(.exe
+CFLAGS = -Wall -std=c++17
 LIBS =
+DEFS = 
 
 SRCS = $(wildcard src/*.cpp)
-SLIBDIR = ./lib
 SLIBS = $(wildcard lib/*.a)
 INCDIR = ./include
-OBJDIR = ./out
+SLIBDIR = ./lib
+OBJDIR = ./obj
+BINDIR = ./bin
 
 OBJS = $(patsubst %.cpp, $(OBJDIR)/%.o, $(notdir $(SRCS)))
 
 all: $(MAIN)
 
 $(MAIN): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(addprefix -I, $(INCDIR)) $(addprefix -L, $(SLIBDIR)) $(SLIBS) $(addprefix -D, $(DEFS)) $(LIBS)
+	@mkdir -p $(BINDIR)
+	$(CXX) $(CFLAGS) -o $@ $^ $(addprefix -I, $(INCDIR)) $(addprefix -L, $(SLIBDIR)) $(SLIBS) $(addprefix -D, $(DEFS)) $(LIBS)
 
 $(OBJDIR)/%.o: src/%.cpp
-	$(CC) $(CFLAGS) -c -o $@ $< $(addprefix -D, $(DEFS)) $(addprefix -I, $(INCDIR))
+	@mkdir -p $(@D)
+	$(CXX) $(CFLAGS) -c -o $@ $< $(addprefix -D, $(DEFS)) $(addprefix -I, $(INCDIR))
 
 clean:
-	del out\\*.o
-	del bin\\*.exe
+	rm -rf $(OBJDIR) $(MAIN)
 
 run:
 	$(MAIN))";
@@ -194,41 +195,32 @@ run:
 int main(int argc, char *argv[])
 {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, main_color);
 
-    std::cout << R"(
-________/\\\\\\\\\________________________________________/\\\\\\\\\\\\\_______/\\\\\\\\\\\\_        
- _____/\\\////////________________________________________\/\\\/////////\\\___/\\\//////////__       
-  ___/\\\/________________/\\\__________/\\\_______________\/\\\_______\/\\\__/\\\_____________      
-   __/\\\_________________\/\\\_________\/\\\_______________\/\\\\\\\\\\\\\/__\/\\\____/\\\\\\\_     
-    _\/\\\______________/\\\\\\\\\\\__/\\\\\\\\\\\___________\/\\\/////////____\/\\\___\/////\\\_    
-     _\//\\\____________\/////\\\///__\/////\\\///____________\/\\\_____________\/\\\_______\/\\\_   
-      __\///\\\______________\/\\\_________\/\\\_______________\/\\\_____________\/\\\_______\/\\\_  
-       ____\////\\\\\\\\\_____\///__________\///________________\/\\\_____________\//\\\\\\\\\\\\/__ 
-        _______\/////////________________________________________\///_______________\////////////____
-        )" << std::endl;
+    SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
+    std::cout << logo << std::endl;
 
     SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
     std::cout << "C++ Project Genrator" << std::endl;
-    std::cout << "build v0.1 5:16PM 1/15/2023" << std::endl;
-
+    std::cout << "alpha v0.2 8:28AM 8/30/2024" << std::endl;
     SetConsoleTextAttribute(hConsole, 7);
 
     std::cout << "Enter project name" << std::endl;
     std::string name;
     std::getline(std::cin, name);
 
-    std::string code_types[3] = { "Program", "Dll", "Static lib" };
-    int code_type = Menu(hConsole, 3, code_types, "Project Type?");
+    std::string options[1] = { "Empty" };
+    int result = Menu(hConsole, 1, options, "Project Type?");
 
-    if (code_type == -1)
-        return 0;
+    switch (result)
+    {
+    case 0:
+        std::cout << "Making project..." << std::endl; 
+        MakeProgramFiles(name);
+        break;
     
-    std::cout << "Making project..." << std::endl; 
+    default:
+        break;
+    }
 
-    MakeProjectFiles(name, code_type);
-
-    std::cout << "Done!" << std::endl;
-
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -1,11 +1,13 @@
 #include <iostream>
 #include <filesystem>
+#include <algorithm>
 #include <fstream>
 #include <string>
 #include <windows.h>
 #include <conio.h>
 
-#include "logo.hpp"
+#include "logo.h"
+#include "template_makefile_genorator.h"
 
 void SetCursorPosition(int XPos, int YPos)
 {
@@ -136,18 +138,18 @@ int Menu(HANDLE hConsole, int numOfOptions, std::string options[64], std::string
     }
 }
 
-void MakeProgramFiles(std::string name)
+void MakeProgramFiles(std::string name, int type)
 {
     std::string project_path = "./" + name;
     std::filesystem::create_directory(project_path);
     std::filesystem::create_directory(project_path + "/src");
     std::filesystem::create_directory(project_path + "/lib");
-    std::filesystem::create_directory(project_path + "/bin");
-    std::filesystem::create_directory(project_path + "/obj");
     std::filesystem::create_directory(project_path + "/include");
 
-    std::ofstream ofs_main(project_path + "/src/main.cpp");
-    ofs_main << 
+    if (type == 0)
+    {
+        std::ofstream ofs_main(project_path + "/src/main.cpp");
+        ofs_main << 
 R"(#include <iostream>
 
 int main(int argc, char *argv[])
@@ -155,40 +157,54 @@ int main(int argc, char *argv[])
     std::cout << "it works" << std::endl;
     return 0;
 })";
-    ofs_main.close();
+        ofs_main.close();
+    }
+    else if (type == 1)
+    {
+        std::string nameupper = name;
+        std::transform(nameupper.begin(), nameupper.end(), nameupper.begin(), ::toupper);
+        std::ofstream ofs_main(project_path + "/src/" + name + ".h");
+        ofs_main << 
+R"(#ifndef )" + nameupper + R"(_HPP
+#define )" + nameupper + R"(_HPP
+
+#ifdef __cplusplus
+    extern "C" {
+#endif
+
+#ifdef BUILD_DLL
+    #define )" + nameupper + R"( __declspec(dllexport)
+#else
+    #define )" + nameupper + R"( __declspec(dllimport)
+#endif
+
+// functions here
+
+#ifdef __cplusplus
+    }
+#endif
+
+// or here
+
+#endif)";
+
+        ofs_main.close();
+
+        std::ofstream ofs_main1(project_path + "/src/" + name +".cpp");
+        ofs_main1 << 
+R"(#include ")" + name + R"(.h"
+)";
+        ofs_main1.close();
+    }
+
 
     std::ofstream ofs_make(project_path + "/makefile");
-    ofs_make <<
-R"(CXX = g++
-MAIN = bin/)" << name + R"(.exe
-CFLAGS = -Wall -std=c++17
-LIBS =
-DEFS = 
 
-SRCS = $(wildcard src/*.cpp)
-SLIBS = $(wildcard lib/*.a)
-INCDIR = ./include
-SLIBDIR = ./lib
-OBJDIR = ./obj
-BINDIR = ./bin
+    if (type == 0)
+        ofs_make << basicMakefile(name);
+    else if (type == 1)
+        ofs_make << dllMakefile(name);
 
-OBJS = $(patsubst %.cpp, $(OBJDIR)/%.o, $(notdir $(SRCS)))
-
-all: $(MAIN)
-
-$(MAIN): $(OBJS)
-	@mkdir -p $(BINDIR)
-	$(CXX) $(CFLAGS) -o $@ $^ $(addprefix -I, $(INCDIR)) $(addprefix -L, $(SLIBDIR)) $(SLIBS) $(addprefix -D, $(DEFS)) $(LIBS)
-
-$(OBJDIR)/%.o: src/%.cpp
-	@mkdir -p $(@D)
-	$(CXX) $(CFLAGS) -c -o $@ $< $(addprefix -D, $(DEFS)) $(addprefix -I, $(INCDIR))
-
-clean:
-	rm -rf $(OBJDIR) $(MAIN)
-
-run:
-	$(MAIN))";
     ofs_make.close();
 }
 
@@ -201,21 +217,25 @@ int main(int argc, char *argv[])
 
     SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
     std::cout << "C++ Project Genrator" << std::endl;
-    std::cout << "alpha v0.2 8:28AM 8/30/2024" << std::endl;
+    std::cout << "alpha v0.3.1 8:02PM 9/2/2024" << std::endl;
     SetConsoleTextAttribute(hConsole, 7);
 
     std::cout << "Enter project name" << std::endl;
     std::string name;
     std::getline(std::cin, name);
 
-    std::string options[1] = { "Empty" };
-    int result = Menu(hConsole, 1, options, "Project Type?");
+    std::string options[2] = { "Empty", "DLL" };
+    int result = Menu(hConsole, 2, options, "Project Type?");
 
     switch (result)
     {
     case 0:
-        std::cout << "Making project..." << std::endl; 
-        MakeProgramFiles(name);
+        std::cout << "Making Empty project..." << std::endl; 
+        MakeProgramFiles(name, result);
+        break;
+    case 1:
+        std::cout << "Making DLL project..." << std::endl; 
+        MakeProgramFiles(name, result);
         break;
     
     default:

@@ -1,6 +1,6 @@
 #pragma once
-#define LOGO_HPP
-#ifdef LOGO_HPP
+#define LOGO_H
+#ifdef LOGO_H
 
 #include <string>
 

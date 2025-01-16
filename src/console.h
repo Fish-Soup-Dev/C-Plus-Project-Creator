@@ -45,6 +45,8 @@ private:
     std::tuple<int, int> GetConsoleCursorPosition();
 
     int GetInput();
+
+    void setColor(COLOR color);
 };
 
 #endif

@@ -3,9 +3,9 @@ Simple command-line tool for creating c++ projects with full folder structure an
 
 ## Build Status
 
-- **Linux**: ![Linux Build Status](https://github.com/yourusername/yourrepository/workflows/Linux/badge.svg)
-- **Windows**: ![Windows Build Status](https://github.com/yourusername/yourrepository/workflows/Windows/badge.svg)
-- **macOS**: ![macOS Build Status](https://github.com/yourusername/yourrepository/workflows/macOS/badge.svg)
+- **Linux**: ![Linux Build Status](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+- **Windows**: ![Windows Build Status](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+- **macOS**: ![macOS Build Status](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
 
 Example Screenshot
 ![Screenshot](assets/screenshot.png)

@@ -1,6 +1,7 @@
 CXX = g++
+BUILD ?= DEBUG
 MAIN = bin/CPPG.exe
-CFLAGS = -Wall -std=c++17
+CFLAGS = -std=c++17
 LIBS =
 DEFS = 
 
@@ -8,10 +9,16 @@ SRCS = $(wildcard src/*.cpp)
 SLIBS = $(wildcard lib/*.a)
 INCDIR = ./include
 SLIBDIR = ./lib
-OBJDIR = ./obj
+OBJDIR = ./obj/$(BUILD)
 BINDIR = ./bin
 
 OBJS = $(patsubst %.cpp, $(OBJDIR)/%.o, $(notdir $(SRCS)))
+
+ifeq ($(BUILD),DEBUG)
+    CFLAGS += -g -Wall -DDEBUG
+else ifeq ($(BUILD),RELEASE)
+    CFLAGS += -O2 -DNDEBUG
+endif
 
 all: $(MAIN)
 
@@ -24,7 +31,13 @@ $(OBJDIR)/%.o: src/%.cpp
 	$(CXX) $(CFLAGS) -c -o $@ $< $(addprefix -D, $(DEFS)) $(addprefix -I, $(INCDIR))
 
 clean:
-	rm -rf $(OBJDIR) $(MAIN)
+	rm -rf ./obj ./bin
 
-run:
+run: $(MAIN)
 	$(MAIN)
+
+debug: 
+	@$(MAKE) BUILD=DEBUG
+
+release:
+	@$(MAKE) BUILD=RELEASE

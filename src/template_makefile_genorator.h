@@ -7,8 +7,9 @@
 std::string basicMakefile(std::string name)
 {
     return R"(CXX = g++
+BUILD ?= DEBUG
 MAIN = bin/)" + name + R"(.exe
-CFLAGS = -Wall -std=c++17
+CFLAGS = -std=c++17
 LIBS =
 DEFS = 
 
@@ -20,6 +21,12 @@ OBJDIR = ./obj
 BINDIR = ./bin
 
 OBJS = $(patsubst %.cpp, $(OBJDIR)/%.o, $(notdir $(SRCS)))
+
+ifeq ($(BUILD),DEBUG)
+	CFLAGS += -g -Wall -DDEBUG
+else ifeq ($(BUILD),RELEASE)
+	CFLAGS += -O2 -DNDEBUG
+endif
 
 all: $(MAIN)
 
@@ -35,15 +42,22 @@ clean:
 	rm -rf $(OBJDIR) $(MAIN)
 
 run:
-	$(MAIN))";
+	$(MAIN)
+
+debug: 
+	@$(MAKE) BUILD=DEBUG
+
+release:
+	@$(MAKE) BUILD=RELEASE)";
 }
 
 std::string dllMakefile(std::string name)
 {
     return R"(CXX = g++
+BUILD ?= DEBUG
 MAIN = bin/)" + name + R"(.dll
 OTHER = bin/)" + name + R"(dll.lib
-CFLAGS = -Wall -std=c++17 -shared
+CFLAGS = -std=c++17 -shared
 LIBS =
 DEFS = BUILD_DLL
 
@@ -56,6 +70,12 @@ BINDIR = ./bin
 
 OBJS = $(patsubst %.cpp, $(OBJDIR)/%.o, $(notdir $(SRCS)))
 
+ifeq ($(BUILD),DEBUG)
+	CFLAGS += -g -Wall -DDEBUG
+else ifeq ($(BUILD),RELEASE)
+	CFLAGS += -O2 -DNDEBUG
+endif
+
 all: $(MAIN)
 
 $(MAIN): $(OBJS)
@@ -67,7 +87,13 @@ $(OBJDIR)/%.o: src/%.cpp
 	$(CXX) $(CFLAGS) -c -o $@ $< $(addprefix -D, $(DEFS)) $(addprefix -I, $(INCDIR))
 
 clean:
-	rm -rf $(OBJDIR) $(MAIN))";
+	rm -rf $(OBJDIR) $(MAIN)
+
+debug: 
+	@$(MAKE) BUILD=DEBUG
+
+release:
+	@$(MAKE) BUILD=RELEASE)";
 }
 
 #endif

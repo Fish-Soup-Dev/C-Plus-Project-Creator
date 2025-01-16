@@ -1,7 +1,7 @@
 #define LOGO_H
 #ifdef LOGO_H
 
-#define VERSION "0.4.2"
+#define VERSION "0.4.3"
 
 #include <string>
 

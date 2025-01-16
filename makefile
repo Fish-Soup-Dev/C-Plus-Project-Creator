@@ -1,7 +1,7 @@
 CXX = g++
 BUILD ?= DEBUG
 MAIN = $(BINDIR)/CPPG.exe
-CFLAGS = -std=c++17
+CFLAGS = -std=c++17 -static
 LIBS =
 DEFS = 
 

@@ -1,6 +1,6 @@
 CXX = g++
 BUILD ?= DEBUG
-MAIN = bin/CPPG.exe
+MAIN = $(BINDIR)/CPPG.exe
 CFLAGS = -std=c++17
 LIBS =
 DEFS = 
@@ -10,7 +10,7 @@ SLIBS = $(wildcard lib/*.a)
 INCDIR = ./include
 SLIBDIR = ./lib
 OBJDIR = ./obj/$(BUILD)
-BINDIR = ./bin
+BINDIR = ./bin/$(BUILD)
 
 OBJS = $(patsubst %.cpp, $(OBJDIR)/%.o, $(notdir $(SRCS)))
 

@@ -4,12 +4,12 @@
 
 #include <string>
 
-std::string basicMakefile(std::string name)
+std::string basicMakefile(std::string name, std::string version)
 {
     return R"(CXX = g++
 BUILD ?= DEBUG
 MAIN = bin/)" + name + R"(.exe
-CFLAGS = -std=c++17
+CFLAGS = )" + version + R"(
 LIBS =
 DEFS = 
 
@@ -51,13 +51,13 @@ release:
 	@$(MAKE) BUILD=RELEASE)";
 }
 
-std::string dllMakefile(std::string name)
+std::string dllMakefile(std::string name, std::string version)
 {
     return R"(CXX = g++
 BUILD ?= DEBUG
 MAIN = bin/)" + name + R"(.dll
 OTHER = bin/)" + name + R"(dll.lib
-CFLAGS = -std=c++17 -shared
+CFLAGS = )" + version + R"( -shared
 LIBS =
 DEFS = BUILD_DLL
 

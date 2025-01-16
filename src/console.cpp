@@ -64,7 +64,7 @@ int Console::menu(int numOfOptions, std::string options[64], std::string mesage)
             break;
         }
 
-        int y = GetConsoleCursorPosition(m_hConsole).Y;
+        int y = std::get<1>(GetConsoleCursorPosition());
 
         SetCursorPosition(0, y - numOfOptions);
 
@@ -92,19 +92,14 @@ void Console::SetCursorPosition(int XPos, int YPos)
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-COORD Console::GetConsoleCursorPosition(HANDLE hConsoleOutput)
+std::tuple<int, int> Console::GetConsoleCursorPosition()
 {
     CONSOLE_SCREEN_BUFFER_INFO cbsi;
-    if (GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi))
-    {
-        return cbsi.dwCursorPosition;
-    }
+
+    if (GetConsoleScreenBufferInfo(m_hConsole, &cbsi))
+        return std::make_tuple(cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y);
     else
-    {
-        // The function failed. Call GetLastError() for details.
-        COORD invalid = { 0, 0 };
-        return invalid;
-    }
+        return std::make_tuple(0, 0);
 }
 
 int Console::GetInput()

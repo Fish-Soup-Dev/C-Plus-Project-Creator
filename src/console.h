@@ -2,15 +2,23 @@
 #define CONSOLE_H
 
 #include <iostream>
+#include <tuple>
 #include <string>
-#include <windows.h>
-#include <conio.h>
+
+#if defined(_WIN32) || defined(_WIN64)
+    #include <windows.h>
+    #include <conio.h>
+#elif defined(__linux__)
+    // nothing
+#elif defined(__APPLE__) || defined(__MACH__)
+    // nothing
+#endif
 
 enum COLOR
 {
-    BLUE = FOREGROUND_BLUE,
-    GREEN = FOREGROUND_GREEN,
-    RED = FOREGROUND_RED,
+    BLUE = 1,
+    GREEN = 2,
+    RED = 4,
     WHITE = 7,
 };
 
@@ -24,10 +32,18 @@ public:
     int menu(int numOfOptions, std::string options[64], std::string mesage);
 
 private:
-    HANDLE m_hConsole;
+    #if defined(_WIN32) || defined(_WIN64)
+        HANDLE m_hConsole;
+    #elif defined(__linux__)
+        // nothing
+    #elif defined(__APPLE__) || defined(__MACH__)
+        // nothing
+    #endif
 
     void SetCursorPosition(int XPos, int YPos);
-    COORD GetConsoleCursorPosition(HANDLE hConsoleOutput);
+
+    std::tuple<int, int> GetConsoleCursorPosition();
+
     int GetInput();
 };
 

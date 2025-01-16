@@ -1,4 +1,4 @@
-# C-Plus-Project-Creator
+# C-Plus-Project-Genorator
 Simple command-line tool for creating c++ projects with full folder structure and makefile.
 
 ## Build Status
